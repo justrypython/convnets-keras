@@ -3,7 +3,7 @@ from keras import backend as K
 from keras.engine import Layer
 from keras.layers.convolutional import Convolution2D
 from keras.layers.core import Lambda
-from keras.layers.core import Merge
+from keras.layers import merge
 
 
 def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
@@ -21,7 +21,7 @@ def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
         extra_channels = K.permute_dimensions(extra_channels, (0, 3, 1, 2))
         scale = k
         for i in range(n):
-            scale += alpha * extra_channels[:, i:i + ch, :, :]
+            scale += alpha * extra_channels[:, i:i + int(ch), :, :]
         scale = scale ** beta
         return X / scale
 
@@ -30,7 +30,7 @@ def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
 
 def splittensor(axis=1, ratio_split=1, id_split=0, **kwargs):
     def f(X):
-        div = X.shape[axis] // ratio_split
+        div = int(X.shape[axis] // ratio_split)
 
         if axis == 0:
             output = X[id_split * div:(id_split + 1) * div, :, :, :]
@@ -55,7 +55,7 @@ def splittensor(axis=1, ratio_split=1, id_split=0, **kwargs):
 
 def convolution2Dgroup(n_group, nb_filter, nb_row, nb_col, **kwargs):
     def f(input):
-        return Merge([
+        return merge([
                          Convolution2D(nb_filter // n_group, nb_row, nb_col)(
                              splittensor(axis=1,
                                          ratio_split=n_group,

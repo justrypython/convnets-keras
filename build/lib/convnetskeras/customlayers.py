@@ -17,7 +17,7 @@ def crosschannelnormalization(alpha=1e-4, k=2, beta=0.75, n=5, **kwargs):
         half = n // 2
         square = K.square(X)
         extra_channels = K.spatial_2d_padding(K.permute_dimensions(square, (0, 2, 3, 1))
-                                              , (0, half))
+                                              , ((0, 0), (half, half)))
         extra_channels = K.permute_dimensions(extra_channels, (0, 3, 1, 2))
         scale = k
         for i in range(n):
